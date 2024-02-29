@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Cpp_TimeGameMode.h"
+#include "Cpp_TimeManager.h"
 #include "Components/ActorComponent.h"
 #include "Cpp_TimeComponent.generated.h"
 
@@ -20,9 +22,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Time")
+	ACpp_TimeManager* TimeManager = nullptr;
 };

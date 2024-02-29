@@ -6,29 +6,70 @@
 // Sets default values
 ACpp_TimeManager::ACpp_TimeManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
-float ACpp_TimeManager::GetTimeDilation() {
-	return currentTimeDilation;
-}
+// Event Tick
+void ACpp_TimeManager::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
 
-void ACpp_TimeManager::BeginReverseTime() {
-	currentTimeDilation = reverseTimeFactor;
-}
-
-void ACpp_TimeManager::EndReverseTime() {
-	currentTimeDilation = normalTimeFactor;
+	// Store Recorded Time
+	if (bIsTimeControlEnabled) {
+		// Update the recorded time
+		currentRecordedTime = TMathUtil<float>::Min(reverseTimeMax, currentRecordedTime + DeltaTime * currentTimeDilation);
+		// Just in case the time is less than 0
+		if (currentRecordedTime <= 0.0f) {
+			EndReverseTime();
+			currentRecordedTime = 0.0f;
+		}
+	}
 }
 
 // Called when the game starts or when spawned
 void ACpp_TimeManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Apply Normal Time Factor
 	currentTimeDilation = normalTimeFactor;
 }
+
+// Gets the current time dilation
+float ACpp_TimeManager::GetTimeDilation() {
+	return currentTimeDilation;
+}
+
+// Gets whether the time control is enabled
+bool ACpp_TimeManager::GetTimeControlStatus()
+{
+	return bIsTimeControlEnabled && currentRecordedTime >= reverseTimeMin;
+}
+
+// Enables the reversal of Time
+void ACpp_TimeManager::BeginReverseTime() {
+	if (GetTimeControlStatus())
+		currentTimeDilation = reverseTimeFactor;
+}
+
+// Disables the reversal of Time
+void ACpp_TimeManager::EndReverseTime() {
+	currentTimeDilation = normalTimeFactor;
+}
+
+// Enables the time control
+void ACpp_TimeManager::EnableTimeControl() {
+	if (!bIsTimeControlEnabled) {
+		bIsTimeControlEnabled = true;
+	}
+}
+
+// Disables the time control
+void ACpp_TimeManager::DisableTimeControl() {
+	if (bIsTimeControlEnabled) {
+		EndReverseTime();
+		bIsTimeControlEnabled = false;
+		currentRecordedTime = 0.0f;
+	}
+}
+
 
